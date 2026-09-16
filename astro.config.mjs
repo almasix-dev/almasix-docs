@@ -90,6 +90,7 @@ export default defineConfig({
 				},
 			],
 			sidebar: [
+				{ label: 'Home', slug: 'index' },
 				{
 					label: 'Prologue',
 					collapsed: false,
