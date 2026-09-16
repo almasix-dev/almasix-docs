@@ -9,21 +9,41 @@ Starter kits are **overlays** on the application scaffolder. Pick one when you r
 `almasix new` (or pass `--kit`) and the installer layers production auth,
 settings, teams, and a shared **Forge** design language on top of the blank app.
 
+The blank **`none`** kit is built into Almasix. Conduit (web), Signet (api), and
+Inertia SPA kits ship as separate packages and register through the
+`almasix.kits` entry-point group.
+
 ```bash title="terminal"
+# Install kits (once per environment)
+pip install 'almasix[kits]'
+# or: pip install almasix-starter-kit-web almasix-starter-kit-api almasix-starter-kit-spa
+
 almasix new myapp --kit web --stack tailwind
 almasix new myapi --kit api
 almasix new myspa --kit react   # or vue | svelte
-almasix stacks                  # lists kits + stacks + databases
+almasix stacks                  # lists discovered kits + stacks + databases
 ```
 
 After scaffolding, migrate and walk register → email verify → logout → login
 in the browser to confirm Day-1 auth.
 
+## Packages
+
+| Package | Kits | Depends on |
+| --- | --- | --- |
+| [`almasix-starter-kit-web`](https://pypi.org/project/almasix-starter-kit-web/) | `web` | [almasix-conduit](https://github.com/almasix-dev/almasix-conduit) |
+| [`almasix-starter-kit-api`](https://pypi.org/project/almasix-starter-kit-api/) | `api` | Signet (in Almasix core) |
+| [`almasix-starter-kit-spa`](https://pypi.org/project/almasix-starter-kit-spa/) | `react`, `vue`, `svelte` | [almasix-inertia](https://github.com/almasix-dev/almasix-inertia) |
+
+Source: [almasix-dev/almasix-starter-kits](https://github.com/almasix-dev/almasix-starter-kits).
+
+If a kit is missing, `almasix new --kit web` tells you which package to install.
+
 ## Kits
 
 | Kit | Flag | Stack | Surface |
 | --- | --- | --- | --- |
-| None | `--kit none` (default) | any | Blank scaffold only |
+| None | `--kit none` (default) | any | Blank scaffold only (built-in) |
 | **Web** | `--kit web` | Tailwind 4 / Bootstrap / none | Prism + Conduit |
 | **API** | `--kit api` | forced `none` | Signet PAT JSON |
 | **SPA** | `--kit react\|vue\|svelte` | forced Tailwind | Official `@inertiajs/*` |
@@ -92,6 +112,11 @@ curl /api/user -H "Authorization: Bearer …"
 
 ## Extending
 
-Kits are files under `src/almasix/installer/stubs/kits/`. Publish a private
-scaffold with `smith stub:publish --scaffold` and point `almasix new --stubs`
-at your tree to keep team overlays.
+Kit overlays live in the starter-kit packages (not in Almasix core). Contribute
+or fork [almasix-starter-kits](https://github.com/almasix-dev/almasix-starter-kits),
+or publish your own package that registers under the `almasix.kits` entry-point
+group and returns an `almasix.installer.kits.Kit` with `stub_root` set.
+
+Publish a private blank scaffold with `smith stub:publish --scaffold` and point
+`almasix new --stubs` at your tree for team-wide app skeletons (kit overlays
+still come from installed starter-kit packages).
