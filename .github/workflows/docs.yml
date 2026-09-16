@@ -1,0 +1,53 @@
+name: Docs
+
+# Builds this Starlight site. Deploy is Cloudflare Workers Builds connected
+# to this repo (root /, build: npm ci && npm run build, deploy: npx wrangler deploy)
+# — same pattern as almasix-website. No CLOUDFLARE_API_TOKEN in GitHub.
+#
+# Cutover:
+#   1. Workers Builds → project almasix-docs on this repo
+#   2. Custom domain docs.almasix.com
+#   3. Remove grey-cloud docs CNAME → almasix-dev.github.io; disable GH Pages on almasix
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run build
+
+      - name: No legacy /almasix/ base path in links
+        run: |
+          stray=$(grep -rhoE '(href|src)="/almasix(/|")' --include='*.html' dist || true)
+          if [ -n "$stray" ]; then
+            echo "::error::Links still use the legacy /almasix base path:"
+            echo "$stray" | sort | uniq -c | sort -rn
+            exit 1
+          fi
+          echo "No legacy /almasix/ link prefixes."
