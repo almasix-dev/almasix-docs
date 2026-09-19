@@ -19,4 +19,4 @@ npm run dev
 
 - Primary: `#F1511B`
 - Type: Outfit + JetBrains Mono (`src/styles/custom.css`)
-- Code blocks: One Dark Pro (always dark)
+- Code blocks: gruvbox-dark-hard via @almasix/starlight-theme

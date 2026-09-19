@@ -1,8 +1,7 @@
 // @ts-check
-import { readFileSync } from 'node:fs';
-
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import almasixTheme from '@almasix/starlight-theme';
 
 // Custom domain docs.almasix.com is served at the domain root.
 // If base is ever a subpath again, src/middleware.ts prefixes Markdown links.
@@ -36,58 +35,19 @@ export default defineConfig({
 			editLink: {
 				baseUrl: 'https://github.com/almasix-dev/almasix-docs/edit/main/',
 			},
-			customCss: ['./src/styles/custom.css'],
+			plugins: [
+				almasixTheme({
+					github: 'almasix-dev/almasix',
+					product: 'Docs',
+					hubUrl: 'https://almasix.com',
+					headerExtras: './src/components/VersionSelect.astro',
+					pageBanner: './src/components/VersionBanner.astro',
+				}),
+			],
 			components: {
-				Header: './src/components/Header.astro',
 				Hero: './src/components/Hero.astro',
-				PageFrame: './src/components/PageFrame.astro',
-				SiteTitle: './src/components/SiteTitle.astro',
-				SocialIcons: './src/components/SocialIcons.astro',
-				ThemeSelect: './src/components/ThemeSelect.astro',
-			},
-			expressiveCode: {
-				themes: ['one-dark-pro'],
-				useStarlightDarkModeSwitch: false,
-				useStarlightUiThemeColors: false,
-				// Avoid hashed /_astro/ec.*.css 404s across pages in Vite/dev
-				// (different pages were emitting different hashes; only one existed).
-				emitExternalStylesheet: false,
-				styleOverrides: {
-					borderRadius: '0.85rem',
-					borderWidth: '1px',
-					codeFontFamily: "'JetBrains Mono', ui-monospace, monospace",
-					codeFontSize: '0.9rem',
-					codeBackground: '#282c34',
-					codeForeground: '#abb2bf',
-					frames: {
-						shadowColor: 'rgba(0, 0, 0, 0.4)',
-						editorBackground: '#282c34',
-						terminalBackground: '#282c34',
-					},
-				},
 			},
 			head: [
-				{
-					tag: 'link',
-					attrs: {
-						rel: 'preconnect',
-						href: 'https://fonts.googleapis.com',
-					},
-				},
-				{
-					tag: 'link',
-					attrs: {
-						rel: 'preconnect',
-						href: 'https://fonts.gstatic.com',
-						crossorigin: true,
-					},
-				},
-				{
-					// Sidebar accordion: one group open at a time. Kept in its own
-					// file so it stays readable, and inlined to avoid a round trip.
-					tag: 'script',
-					content: readFileSync('./src/scripts/sidebar-accordion.js', 'utf8'),
-				},
 				{
 					tag: 'meta',
 					attrs: { property: 'og:image', content: 'https://docs.almasix.com/og.png' },
@@ -117,7 +77,6 @@ export default defineConfig({
 					attrs: { type: 'application/ld+json' },
 					content: "{\"@context\": \"https://schema.org\", \"@graph\": [{\"@type\": \"WebSite\", \"@id\": \"https://docs.almasix.com/#website\", \"url\": \"https://docs.almasix.com/\", \"name\": \"Almasix Docs\", \"description\": \"Official documentation for Almasix \\u2014 Articulate, Prism, Smith, and the rest of the framework.\", \"publisher\": {\"@id\": \"https://almasix.com/#organization\"}, \"inLanguage\": \"en\"}, {\"@type\": \"SoftwareApplication\", \"@id\": \"https://docs.almasix.com/#software\", \"name\": \"Almasix Docs\", \"applicationCategory\": \"DeveloperApplication\", \"url\": \"https://docs.almasix.com/\", \"isPartOf\": {\"@id\": \"https://almasix.com/#software\"}, \"publisher\": {\"@id\": \"https://almasix.com/#organization\"}}]}",
 				},
-
 			],
 			sidebar: [
 				{ label: 'Home', slug: 'index' },
