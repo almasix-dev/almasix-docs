@@ -275,12 +275,23 @@ through the same mailer and transports.
 
 ## Database notifications
 
+The database channel stores notifications in a polymorphic ``notifications``
+table — the same shape Laravel uses. Admin UIs such as Orbit's panel bell read
+from this table after you migrate it.
+
 ### Prerequisites
+
+Generate the migration (either name works; Laravel 11+ uses the ``make:`` form):
 
 ```shell
 python smith notifications:table
+# or
+python smith make:notifications-table
+
 python smith migrate
 ```
+
+For tests or one-off scripts without a migration run:
 
 ```python title="examples/notifications.py"
 from almasix.notifications import ensure_tables
@@ -288,8 +299,8 @@ from almasix.notifications import ensure_tables
 await ensure_tables()
 ```
 
-Schema: UUID `id`, `type`, `notifiable_type` / `notifiable_id`, JSON `data`,
-nullable `read_at`, timestamps.
+Schema: UUID ``id``, ``type``, ``notifiable_type`` / ``notifiable_id``, JSON
+``data``, nullable ``read_at``, timestamps.
 
 ### Formatting database notifications
 
@@ -302,7 +313,7 @@ def to_database(self, notifiable):
     }
 ```
 
-`to_array` defaults to `to_database` and feeds the log / array channels.
+``to_array`` defaults to ``to_database`` and feeds the log / array channels.
 
 ### Accessing notifications
 
@@ -310,9 +321,28 @@ def to_database(self, notifiable):
 unread = await user.unread_notifications()
 all_rows = await user.notifications()
 await user.mark_notification_as_read(unread[0]["id"])
+await user.mark_notification_as_unread(unread[0]["id"])
+await user.mark_notifications_as_read()  # all unread for this user
 ```
 
-Each row includes `id`, `type`, `data`, `read_at`, and timestamps.
+Each row includes ``id``, ``type``, ``data``, ``read_at``, and timestamps.
+
+### DatabaseNotification model
+
+Query or mutate inbox rows with the Articulate model:
+
+```python title="examples/notifications.py"
+from almasix.notifications import DatabaseNotification
+
+row = await DatabaseNotification.find(notification_id)
+assert row is not None
+payload = row.get_data()
+await row.mark_as_read()
+await row.mark_as_unread()
+```
+
+``DatabaseNotificationStore`` is the low-level async API used by the database
+channel and by `Notifiable` helpers.
 
 ## Broadcast notifications
 
